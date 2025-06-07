@@ -1,4 +1,5 @@
 import datetime
+from random import choice
 from flask import Flask, render_template, request, redirect
 from database import db_session, init_db
 from models.restaurants import Restaurants
@@ -17,6 +18,21 @@ def shutdown_session(exception=None):
 def start():
     now = datetime.datetime.now()
     return render_template('start.html',now=now)
+
+@app.route('/draw')
+def draw():
+    restaurants = Restaurants.query.all()
+    
+    if not restaurants:
+        return redirect('/create-restaurant')
+    
+    random_restaurant = choice(restaurants)
+    restaurant = Restaurants.query.get(random_restaurant.id)
+    restaurant.draw += 1
+    db_session.commit()
+    now = datetime.datetime.now()
+    return render_template('draw.html',restaurant = restaurant, now = now)
+    
 
 @app.route('/create-restaurant',methods=["GET","POST"])
 def create_restaurant():
